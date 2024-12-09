@@ -1,0 +1,37 @@
+    farben = {
+                "SCHWARZ": (0, 0, 0),
+                "WEISS": (255, 255, 255),
+                "BLAU": (0, 0, 255),
+                "GELB": (255, 255, 0),
+                "ROT": (255, 0, 0),
+                "PINK": (255, 105, 180),
+                "ORANGE": (255, 165, 0),
+            }
+    
+    s_w = {
+                "player_pos": [9.0, 9.0],  # [x, y]
+                "move": [0, 0],  # [move_x, move_y]
+                "speed": 2,
+                "angle": 0,
+                "mund": 0,
+                "schritt": 0,
+                "direction": None,
+                "next_direction": None,
+                "zaehler": 0,
+                "power_up": False
+            }
+            # Geister Werte
+    ghosts = [
+                {"x": 9.0, "y": 7.0, "color": farben["ROT"], "speed": 2, "move": [0, 0]},
+                {"x": 10.0, "y": 7.0, "color": farben["PINK"], "speed": 2, "move": [0, 0]},
+                {"x": 8.0, "y": 7.0, "color": farben["BLAU"], "speed": 2, "move": [0, 0]},
+                {"x": 9.0, "y": 6.0, "color": farben["ORANGE"], "speed": 2, "move": [0, 0]},
+            ]
+        # Geister Bilder
+    ghost_img = {
+                farben["ROT"]: pygame.image.load("./assets/red_ghost.png"),
+                farben["PINK"]: pygame.image.load("./assets/pink_ghost.png"),
+                farben["BLAU"]: pygame.image.load("./assets/blue_ghost.png"),
+                farben["ORANGE"]: pygame.image.load("./assets/orange_ghost.png"),
+                "POWER_UP": pygame.image.load("./assets/powerup.png"),  # Power-Up-Bild
+            }
