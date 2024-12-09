@@ -5,6 +5,90 @@ import random
 
 #Pacman Spiel
 if __name__ == "__main__":
+
+    # Hauptmenü anzeigen
+    def hauptmenu():
+        pygame.init()
+        menu_breite = 600
+        menu_hoehe = 400
+        screen = pygame.display.set_mode((menu_breite, menu_hoehe))
+        pygame.display.set_caption("Pac-Man Hauptmenü")
+        clock = pygame.time.Clock()
+        font = pygame.font.SysFont(None, 50)
+        optionen = ["Spiel starten", "Highscores anzeigen", "Spiel beenden"]
+
+        auswahl = 0  # Aktuelle Auswahl
+        running = True
+
+        while running:
+            screen.fill((0, 0, 0))  # Schwarzer Hintergrund
+
+            # Menüoptionen anzeigen
+            for index, text in enumerate(optionen):
+                if index == auswahl:
+                    label = font.render(text, True, (255, 255, 0))  # Gelbe Schrift für die aktuelle Auswahl
+                else:
+                    label = font.render(text, True, (255, 255, 255))  # Weiße Schrift
+                screen.blit(label, (menu_breite // 2 - label.get_width() // 2, 100 + index * 60))
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+                    pygame.quit()
+                    sys.exit()
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_UP:
+                        auswahl = (auswahl - 1) % len(optionen)
+                    elif event.key == pygame.K_DOWN:
+                        auswahl = (auswahl + 1) % len(optionen)
+                    elif event.key == pygame.K_RETURN:
+                        if auswahl == 0:  # Spiel starten
+                            running = False
+                        elif auswahl == 1:  # Highscores anzeigen
+                            anzeigen_highscores()
+                        elif auswahl == 2:  # Spiel beenden
+                            pygame.quit()
+                            sys.exit()
+
+            pygame.display.flip()
+            clock.tick(30)
+    # Highscores anzeigen
+    def anzeigen_highscores():
+        pygame.init()
+        screen = pygame.display.set_mode((600, 400))
+        pygame.display.set_caption("Highscores")
+        clock = pygame.time.Clock()
+        font = pygame.font.SysFont(None, 50)
+        small_font = pygame.font.SysFont(None, 35)
+
+        try:
+            with open("highscore.csv", "r") as datei:
+                highscore = int(datei.readline().strip())
+        except FileNotFoundError:
+            highscore = 0
+
+        running = True
+
+        while running:
+            screen.fill((0, 0, 0))  # Schwarzer Hintergrund
+
+            label = font.render("Highscore", True, (255, 255, 255))
+            screen.blit(label, (300 - label.get_width() // 2, 100))
+
+            score_label = small_font.render(f"Score: {highscore}", True, (255, 255, 0))
+            screen.blit(score_label, (300 - score_label.get_width() // 2, 200))
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+                    pygame.quit()
+                    sys.exit()
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_RETURN or event.key == pygame.K_ESCAPE:
+                        running = False
+
+            pygame.display.flip()
+            clock.tick(30)
     # Spielfeld (0: leer, 1: Wand, 2: Punkt, 3: Power-Up)
     def read_field():
         with open("pacman_field.txt", "r") as datei:
@@ -228,20 +312,16 @@ if __name__ == "__main__":
         # ... Geister verfolgen Pacman
         def geister_bewegung_2(ghosts, pacman_pos, pacman_field, PIXEL):
             directions = [(0, -1), (0, 1), (-1, 0), (1, 0)]  # Bewegungsrichtungen
-
             for ghost in ghosts:
                 ghost_x, ghost_y = ghost["x"], ghost["y"]
-
                 if abs(ghost_x - round(ghost_x)) < 0.01 and abs(ghost_y - round(ghost_y)) < 0.01:
                     ghost_x, ghost_y = round(ghost_x), round(ghost_y)
-
                     queue = [(ghost_x, ghost_y)]
                     visited = set(queue)
                     parent = {}
 
                     while queue:
                         current_x, current_y = queue.pop(0)
-
                         for dx, dy in directions:
                             neighbor_x, neighbor_y = current_x + dx, current_y + dy
                             if (
@@ -253,26 +333,21 @@ if __name__ == "__main__":
                                 queue.append((neighbor_x, neighbor_y))
                                 visited.add((neighbor_x, neighbor_y))
                                 parent[(neighbor_x, neighbor_y)] = (current_x, current_y)
-
                                 if (neighbor_x, neighbor_y) == (int(round(pacman_pos[0])), int(round(pacman_pos[1]))):
                                     queue = []  # Ziel gefunden
-
                     next_position = (ghost_x, ghost_y)
                     current_position = (int(round(pacman_pos[0])), int(round(pacman_pos[1])))
 
                     while current_position in parent:
                         next_position = current_position
                         current_position = parent[current_position]
-
                     next_x, next_y = next_position
                     ghost["move"] = [(next_x - ghost_x), (next_y - ghost_y)]
 
-                ghost["x"] += ghost["move"][0] * (ghost["speed"] / PIXEL)
+                ghost["x"] += ghost["move"][0] * (ghost["speed"] / PIXEL) # Bewegung
                 ghost["y"] += ghost["move"][1] * (ghost["speed"] / PIXEL)
-
-                # Sicherstellen, dass die Geister innerhalb des Spielfelds bleiben
-                ghost["x"] = max(0, min(len(pacman_field[0]) - 1, ghost["x"]))
-                ghost["y"] = max(0, min(len(pacman_field) - 1, ghost["y"]))
+                ghost["x"] = max(0, min(len(pacman_field[0]) - 2, ghost["x"])) # Sicherstellen, dass die Geister innerhalb des Spielfelds bleiben
+                ghost["y"] = max(0, min(len(pacman_field) - 2, ghost["y"]))
         # Geister rennen bei Power-Up weg
         def run_away(ghosts, pacman_pos, pacman_field, PIXEL):
             directions = [(0, -1), (0, 1), (-1, 0), (1, 0)]  # Oben, Unten, Links, Rechts
@@ -365,9 +440,12 @@ if __name__ == "__main__":
                         text_breite = text.get_width()
                         screen.blit(text, [(SCREEN_WIDTH / 2) - text_breite / 2, PIXEL / 4])
                         save_highscore(s_w, ghosts)
+                        pygame.display.flip()
+                        pygame.time.delay(5000)
+                        hauptmenu()
         # Highscore Auslesen
         def read_highscore():
-            with open("highscore.txt", "r") as datei:
+            with open("highscore.csv", "r") as datei:
                 current_highscore = int(datei.readline().strip())
             return current_highscore
         # Schauen, ob alle Punkte eingesammelt sind
@@ -380,6 +458,8 @@ if __name__ == "__main__":
 
             if Init == 0:
                 save_highscore(s_w, ghosts)
+                pygame.time.delay(5000)
+                hauptmenu()
         # Highscore speichern
         def save_highscore(s_w, ghosts):
             s_w["move"] = [0, 0]
@@ -389,7 +469,7 @@ if __name__ == "__main__":
             current_highscore = read_highscore()
 
             if s_w["zaehler"] > current_highscore:
-                with open("highscore.txt", "w") as datei:
+                with open("highscore.csv", "w") as datei:
                     datei.write(str(s_w["zaehler"]))  # Neuer Highscore wird gespeichert
                 print("New Highscore!")
         # Highscore anzeigen
@@ -456,15 +536,16 @@ if __name__ == "__main__":
 
         pygame.quit()
         sys.exit()
-
     # Raster Grösse
     PIXEL = 40
     # Pacman Spiel starten
-    pacman_spiel(
-        PIXEL,
-        read_field(),
-        farben(),
-        start_werte(),
-        ghosts(farben()),
-        ghost_images(farben(),PIXEL)
-    )
+    while True:
+        hauptmenu()
+        pacman_spiel(
+            PIXEL,
+            read_field(),
+            farben(),
+            start_werte(),
+            ghosts(farben()),
+            ghost_images(farben(),PIXEL)
+        )
