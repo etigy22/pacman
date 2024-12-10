@@ -270,14 +270,14 @@ if __name__ == "__main__":
                     s_w["power_up"] = False
                     power_up_timer = 0
             else:
-                # Neue Logik hinzufügen
-                if not s_w["power_up"]:  # Wenn kein Power-Up aktiv ist
-                    for ghost in ghosts:
-                        if ghost["move"] == [0, 0]:  # Sicherstellen, dass Bewegung vorhanden ist
-                            geister_bewegung_1(ghosts, pacman_field, PIXEL)
+                # # Neue Logik hinzufügen
+                # if not s_w["power_up"]:  # Wenn kein Power-Up aktiv ist
+                #     for ghost in ghosts:
+                #         if ghost["move"] == [0, 0]:  # Sicherstellen, dass Bewegung vorhanden ist
+                #             geister_bewegung_1(ghosts, pacman_field, PIXEL)
 
                 # Normale Bewegungslogik der Geister
-                wahl = random.choice([1, 2])
+                wahl = random.choice([1, 2, 3])
                 if wahl == 1:
                     geister_bewegung_1(ghosts, pacman_field, PIXEL)
                 else:
@@ -441,8 +441,9 @@ if __name__ == "__main__":
                         screen.blit(text, [(SCREEN_WIDTH / 2) - text_breite / 2, PIXEL / 4])
                         save_highscore(s_w, ghosts)
                         pygame.display.flip()
-                        pygame.time.delay(5000)
-                        hauptmenu()
+                        pygame.time.delay(3000)
+                        return True
+            return False
         # Highscore Auslesen
         def read_highscore():
             with open("highscore.csv", "r") as datei:
@@ -458,8 +459,16 @@ if __name__ == "__main__":
 
             if Init == 0:
                 save_highscore(s_w, ghosts)
-                pygame.time.delay(5000)
-                hauptmenu()
+                ausgabetext = "Gewonnen!"
+                font = pygame.font.SysFont(None, PIXEL)
+                text = font.render(ausgabetext, True, farben["ROT"])
+                text_breite = text.get_width()
+                screen.blit(text, [(SCREEN_WIDTH / 2) - text_breite / 2, PIXEL / 4])
+                save_highscore(s_w, ghosts)
+                pygame.display.flip()
+                pygame.time.delay(3000)
+                return True
+            return False
         # Highscore speichern
         def save_highscore(s_w, ghosts):
             s_w["move"] = [0, 0]
@@ -519,14 +528,16 @@ if __name__ == "__main__":
             draw_pacman(s_w["player_pos"][0], s_w["player_pos"][1], s_w["angle"], s_w["mund"])
             # Zeichne Geister
             draw_ghosts(ghosts, s_w["power_up"], ghost_images)
-            # Ist das Spiel fertig?
-            check_finish(s_w, ghosts)
             # Highscore anzeigen
             display_highscore(farben)
             # Score anzeigen
             display_score()
             # Kollisions Logik zwischen Pacman und Geister
-            check_collision(s_w, ghosts, PIXEL)  # Kollision Check
+            if check_collision(s_w, ghosts, PIXEL):  # Kollision Check
+                return  # Return to main menu
+            # Ist das Spiel fertig?
+            if check_finish(s_w, ghosts):
+                return  # Return to main menu
             # Aktualisieren
             pygame.display.flip()
             # Clock Frames
