@@ -343,7 +343,7 @@ if __name__ == "__main__":
                 ghost["y"] = max(0, min(len(pacman_field) - 2, ghost["y"]))
         # Geister rennen bei Power-Up weg
         def run_away(ghosts, pacman_pos, pacman_field, PIXEL):
-            directions = [(0, -1), (0, 1), (-1, 0), (1, 0)]  # Oben, Unten, Links, Rechts
+            directions = [(0, -1), (0, 1), (-1, 0), (1, 0)]  # Bewegungsrichtungen: oben, unten, links, rechts
 
             for ghost in ghosts:
                 ghost_x, ghost_y = ghost["x"], ghost["y"]
@@ -364,7 +364,7 @@ if __name__ == "__main__":
                         if (
                                 0 <= next_x < len(pacman_field[0]) and
                                 0 <= next_y < len(pacman_field) and
-                                pacman_field[next_y][next_x] != 1
+                                pacman_field[next_y][next_x] != 1  # Keine Wand
                         ):
                             # Abstand zum Pac-Man berechnen
                             distance = math.sqrt((next_x - pacman_x) ** 2 + (next_y - pacman_y) ** 2)
@@ -379,26 +379,20 @@ if __name__ == "__main__":
                         move = random.choice(best_moves)
                         ghost["move"] = [move[0], move[1]]
 
-                # Geist sanft bewegen
-                ghost["x"] += ghost["speed"] / 2 / PIXEL * ghost["move"][0]
-                ghost["y"] += ghost["speed"] / 2 / PIXEL * ghost["move"][1]
+                # Bewegung ausführen und prüfen, ob die neue Position gültig bleibt
+                new_x = ghost["x"] + ghost["speed"] / 2 / PIXEL * ghost["move"][0]
+                new_y = ghost["y"] + ghost["speed"] / 2 / PIXEL * ghost["move"][1]
 
-                # Zentriere den Geist erneut, falls nahe genug
-                if abs(ghost["x"] - round(ghost["x"])) < 0.01:
-                    ghost["x"] = round(ghost["x"])
-                if abs(ghost["y"] - round(ghost["y"])) < 0.01:
-                    ghost["y"] = round(ghost["y"])
-
-                # Sicherstellen, dass die Geisterkoordinaten innerhalb des Spielfelds bleiben
-                if ghost["x"] < 0:
-                    ghost["x"] = 0
-                elif ghost["x"] >= len(pacman_field[0]):
-                    ghost["x"] = len(pacman_field[0]) - 1
-
-                if ghost["y"] < 0:
-                    ghost["y"] = 0
-                elif ghost["y"] >= len(pacman_field):
-                    ghost["y"] = len(pacman_field) - 1
+                if (
+                        0 <= round(new_x) < len(pacman_field[0]) and
+                        0 <= round(new_y) < len(pacman_field) and
+                        pacman_field[round(new_y)][round(new_x)] != 1  # Ziel ist keine Wand
+                ):
+                    ghost["x"] = new_x
+                    ghost["y"] = new_y
+                else:
+                    # Wenn Bewegung ungültig ist, stoppe den Geist
+                    ghost["move"] = [0, 0]
         # Pacman geht durch Tunnel
         def tunnel_logik(player_pos, direction, pacman_field):
             if player_pos[0] >= len(pacman_field[0]) - 1 and direction == "Right":
