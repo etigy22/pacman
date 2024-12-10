@@ -433,9 +433,15 @@ if __name__ == "__main__":
             return False
         # Highscore Auslesen
         def read_highscore():
-            with open("highscore.csv", "r") as datei:
-                current_highscore = int(datei.readline().strip())
-            return current_highscore
+            try:
+                with open("highscore.csv", "r") as datei:
+                    line = datei.readline().strip()
+                    if line.endswith(","):
+                        line = line[:-1]
+                    current_highscore = int(line)
+                    return current_highscore
+            except FileNotFoundError:
+                return 0  # Default highscore if file doesn't exist
         # Schauen, ob alle Punkte eingesammelt sind
         def check_finish(s_w, ghosts):
             Init = 0
@@ -462,12 +468,12 @@ if __name__ == "__main__":
             s_w["move"] = [0, 0]
             for ghost in ghosts:
                 ghost["move"] = [0, 0]
-            # print("Finish")
+
             current_highscore = read_highscore()
 
             if s_w["zaehler"] > current_highscore:
                 with open("highscore.csv", "w") as datei:
-                    datei.write(str(s_w["zaehler"]))  # Neuer Highscore wird gespeichert
+                    datei.write(f"{s_w['zaehler']},")
                 print("New Highscore!")
         # Highscore anzeigen
         def display_highscore(farben):
