@@ -61,9 +61,13 @@ if __name__ == "__main__":
         font = pygame.font.SysFont(None, 50)
         small_font = pygame.font.SysFont(None, 35)
 
+        # Read the highscore with a comma at the end
         try:
             with open("highscore.csv", "r") as datei:
-                highscore = int(datei.readline().strip())
+                line = datei.readline().strip()
+                if line.endswith(","):
+                    line = line[:-1]  # Remove the trailing comma
+                highscore = int(line) if line.isdigit() else 0
         except FileNotFoundError:
             highscore = 0
 
@@ -72,9 +76,11 @@ if __name__ == "__main__":
         while running:
             screen.fill((0, 0, 0))  # Schwarzer Hintergrund
 
+            # Highscore label
             label = font.render("Highscore", True, (255, 255, 255))
             screen.blit(label, (300 - label.get_width() // 2, 100))
 
+            # Highscore value
             score_label = small_font.render(f"Score: {highscore}", True, (255, 255, 0))
             screen.blit(score_label, (300 - score_label.get_width() // 2, 200))
 
@@ -423,7 +429,7 @@ if __name__ == "__main__":
                         screen.blit(text, [(SCREEN_WIDTH / 2) - text_breite / 2, PIXEL / 4])
                         save_highscore(s_w, ghosts)
                         pygame.display.flip()
-                        pygame.time.delay(3000)
+                        pygame.time.delay(2500)
                         return True
                     elif s_w["power_up"] == True:
                         ghost["x"] = 9.0
@@ -460,7 +466,7 @@ if __name__ == "__main__":
                 screen.blit(text, [(SCREEN_WIDTH / 2) - text_breite / 2, PIXEL / 4])
                 save_highscore(s_w, ghosts)
                 pygame.display.flip()
-                pygame.time.delay(3000)
+                pygame.time.delay(2500)
                 return True
             return False
         # Highscore speichern
