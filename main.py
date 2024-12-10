@@ -270,13 +270,6 @@ if __name__ == "__main__":
                     s_w["power_up"] = False
                     power_up_timer = 0
             else:
-                # # Neue Logik hinzufügen
-                # if not s_w["power_up"]:  # Wenn kein Power-Up aktiv ist
-                #     for ghost in ghosts:
-                #         if ghost["move"] == [0, 0]:  # Sicherstellen, dass Bewegung vorhanden ist
-                #             geister_bewegung_1(ghosts, pacman_field, PIXEL)
-
-                # Normale Bewegungslogik der Geister
                 wahl = random.choice([1, 2, 3])
                 if wahl == 1:
                     geister_bewegung_1(ghosts, pacman_field, PIXEL)
@@ -406,11 +399,6 @@ if __name__ == "__main__":
                     ghost["y"] = 0
                 elif ghost["y"] >= len(pacman_field):
                     ghost["y"] = len(pacman_field) - 1
-
-                if round(pacman_x) == round(ghost["x"]) and round(pacman_y) == round(ghost["y"]):
-                    ghost["x"] = 9.0
-                    ghost["y"] = 7.0
-                    s_w["zaehler"] += 100
         # Pacman geht durch Tunnel
         def tunnel_logik(player_pos, direction, pacman_field):
             if player_pos[0] >= len(pacman_field[0]) - 1 and direction == "Right":
@@ -443,6 +431,11 @@ if __name__ == "__main__":
                         pygame.display.flip()
                         pygame.time.delay(3000)
                         return True
+                    elif s_w["power_up"] == True:
+                        ghost["x"] = 9.0
+                        ghost["y"] = 7.0
+                        s_w["zaehler"] += 100
+
             return False
         # Highscore Auslesen
         def read_highscore():
@@ -458,6 +451,7 @@ if __name__ == "__main__":
                         Init += 1
 
             if Init == 0:
+                s_w["zaehler"] += 200
                 save_highscore(s_w, ghosts)
                 ausgabetext = "Gewonnen!"
                 font = pygame.font.SysFont(None, PIXEL)
