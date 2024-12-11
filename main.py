@@ -235,7 +235,7 @@ if __name__ == "__main__":
                 x = round(ghost["x"])
                 y = round(ghost["y"])
 
-                if abs(ghost["x"] - x) < 0.01 and abs(ghost["y"] - y) < 0.01: # Zentrierung
+                if abs(ghost["x"] - x) < 0.03 and abs(ghost["y"] - y) < 0.03: # Zentrierung
                     ghost["x"], ghost["y"] = x, y
 
                     valid_moves = []
@@ -260,7 +260,7 @@ if __name__ == "__main__":
             directions = [(0, -1), (0, 1), (-1, 0), (1, 0)]  # Bewegungsrichtungen
             for ghost in ghosts:
                 ghost_x, ghost_y = ghost["x"], ghost["y"]
-                if abs(ghost_x - round(ghost_x)) < 0.01 and abs(ghost_y - round(ghost_y)) < 0.01:
+                if abs(ghost_x - round(ghost_x)) < 0.03 and abs(ghost_y - round(ghost_y)) < 0.03:
                     ghost_x, ghost_y = round(ghost_x), round(ghost_y)
                     queue = [(ghost_x, ghost_y)]
                     visited = set(queue)
@@ -302,7 +302,7 @@ if __name__ == "__main__":
                 ghost_x, ghost_y = ghost["x"], ghost["y"]
                 pacman_x, pacman_y = pacman_pos[0], pacman_pos[1]
                 # Prüfen, ob der Geist genau im Zentrum einer Zelle ist
-                if abs(ghost_x - round(ghost_x)) < 0.01 and abs(ghost_y - round(ghost_y)) < 0.01:
+                if abs(ghost_x - round(ghost_x)) < 0.03 and abs(ghost_y - round(ghost_y)) < 0.03:
                     ghost_x, ghost_y = round(ghost_x), round(ghost_y)
                     # Liste für gültige Bewegungen, die vom Pac-Man wegführen
                     best_moves = []
