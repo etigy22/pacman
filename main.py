@@ -7,14 +7,14 @@ import random
 if __name__ == "__main__":
 
     # Hauptmenü anzeigen
-    def hauptmenu():
+    def hauptmenu(PIXEL):
         pygame.init()
-        menu_breite = 600
-        menu_hoehe = 400
+        menu_breite = PIXEL * 15
+        menu_hoehe = PIXEL * 10
         screen = pygame.display.set_mode((menu_breite, menu_hoehe))
         pygame.display.set_caption("Pac-Man Hauptmenü")
         clock = pygame.time.Clock()
-        font = pygame.font.SysFont(None, 50)
+        font = pygame.font.SysFont(None, PIXEL + 10)
         optionen = ["Spiel starten", "Highscores anzeigen", "Spiel beenden"]
 
         auswahl = 0  # Aktuelle Auswahl
@@ -28,8 +28,8 @@ if __name__ == "__main__":
                 if index == auswahl:
                     label = font.render(text, True, (255, 255, 0))  # Gelbe Schrift für die aktuelle Auswahl
                 else:
-                    label = font.render(text, True, (255, 255, 255))  # Weiße Schrift
-                screen.blit(label, (menu_breite // 2 - label.get_width() // 2, 100 + index * 60))
+                    label = font.render(text, True, (255, 255, 255))  # Weisse Schrift
+                screen.blit(label, (menu_breite // 2 - label.get_width() // 2, PIXEL * 3 + index * PIXEL))
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -367,11 +367,7 @@ if __name__ == "__main__":
                         next_x, next_y = ghost_x + dx, ghost_y + dy
 
                         # Prüfen, ob das Ziel gültig ist (keine Wand)
-                        if (
-                                0 <= next_x < len(pacman_field[0]) and
-                                0 <= next_y < len(pacman_field) and
-                                pacman_field[next_y][next_x] != 1  # Keine Wand
-                        ):
+                        if (0 <= next_x < len(pacman_field[0]) and 0 <= next_y < len(pacman_field) and pacman_field[next_y][next_x] != 1):
                             # Abstand zum Pac-Man berechnen
                             distance = math.sqrt((next_x - pacman_x) ** 2 + (next_y - pacman_y) ** 2)
                             if distance > max_distance:
@@ -551,7 +547,7 @@ if __name__ == "__main__":
     PIXEL = 40
     # Pacman Spiel starten
     while True:
-        hauptmenu()
+        hauptmenu(PIXEL)
         pacman_spiel(
             PIXEL,
             read_field(),
