@@ -5,9 +5,9 @@ import random
 
 #Pacman Spiel
 if __name__ == "__main__":
-
+    # Tipp: Zur Lesbarkeit sollten beim Öffnen des Projekts alle Funktionen eingeklappt sein / werden.
     # Hauptmenü anzeigen
-    def hauptmenu(PIXEL):
+    def hauptmenue(PIXEL):
         pygame.init()
         menu_breite = PIXEL * 15
         menu_hoehe = PIXEL * 10
@@ -15,22 +15,17 @@ if __name__ == "__main__":
         pygame.display.set_caption("Pac-Man Hauptmenü")
         clock = pygame.time.Clock()
         font = pygame.font.SysFont(None, PIXEL + 10)
-        optionen = ["Spiel starten", "Highscores anzeigen", "Spiel beenden"]
-
+        optionen = ["Spiel starten", "Highscores anzeigen", "Spiel beenden"] # Optionen im Menu
         auswahl = 0  # Aktuelle Auswahl
         running = True
-
         while running:
             screen.fill((0, 0, 0))  # Schwarzer Hintergrund
-
-            # Menüoptionen anzeigen
-            for index, text in enumerate(optionen):
+            for index, text in enumerate(optionen): # Menüoptionen anzeigen
                 if index == auswahl:
                     label = font.render(text, True, (255, 255, 0))  # Gelbe Schrift für die aktuelle Auswahl
                 else:
                     label = font.render(text, True, (255, 255, 255))  # Weisse Schrift
-                screen.blit(label, (menu_breite // 2 - label.get_width() // 2, PIXEL * 3 + index * PIXEL))
-
+                screen.blit(label, (menu_breite // 2 - label.get_width() // 2, PIXEL * 2 + index * PIXEL * 2))
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
@@ -49,7 +44,6 @@ if __name__ == "__main__":
                         elif auswahl == 2:  # Spiel beenden
                             pygame.quit()
                             sys.exit()
-
             pygame.display.flip()
             clock.tick(30)
     # Highscores anzeigen
@@ -60,8 +54,7 @@ if __name__ == "__main__":
         clock = pygame.time.Clock()
         font = pygame.font.SysFont(None, 50)
         small_font = pygame.font.SysFont(None, 35)
-
-        # Read the highscore with a comma at the end
+        # Highscore ohne Comma am Ende
         try:
             with open("highscore.csv", "r") as datei:
                 line = datei.readline().strip()
@@ -72,18 +65,14 @@ if __name__ == "__main__":
             highscore = 0
 
         running = True
-
         while running:
             screen.fill((0, 0, 0))  # Schwarzer Hintergrund
-
             # Highscore label
             label = font.render("Highscore", True, (255, 255, 255))
             screen.blit(label, (300 - label.get_width() // 2, 100))
-
             # Highscore value
             score_label = small_font.render(f"Score: {highscore}", True, (255, 255, 0))
             screen.blit(score_label, (300 - score_label.get_width() // 2, 200))
-
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
@@ -92,12 +81,11 @@ if __name__ == "__main__":
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_RETURN or event.key == pygame.K_ESCAPE:
                         running = False
-
             pygame.display.flip()
             clock.tick(30)
-    # Spielfeld (0: leer, 1: Wand, 2: Punkt, 3: Power-Up)
+    # Spielfeld einlesen (0: leer, 1: Wand, 2: Punkt, 3: Power-Up)
     def read_field():
-        with open("pacman_field.txt", "r") as datei:
+        with open("pacman_field.txt", "r") as datei: # Spielfeld aus pacman_field.txt lesen
             text = datei.read()
             matrix = []
             row = []
@@ -124,18 +112,18 @@ if __name__ == "__main__":
     # Start Werte
     def start_werte():
         return {
-            "player_pos": [9.0, 9.0],  # [x, y]
-            "move": [0, 0],  # [move_x, move_y]
-            "speed": 2,
-            "angle": 0,
-            "mund": 0,
-            "schritt": 0,
-            "direction": None,
-            "next_direction": None,
-            "zaehler": 0,
-            "power_up": False
+            "player_pos": [9.0, 9.0],  # [x, y] # Position von Pacman
+            "move": [0, 0],  # [move_x, move_y] # Differenz Bewegung zu aktuellem Standpunkt
+            "speed": 2, # Wie schnell soll Pacman sich bewegen (in Pixel)
+            "angle": 0, # Mundwinkel => 0: rechts, 90: oben, -90: unten, 180: links
+            "mund": 0, # Mund macht auf und zu. Wird von dem Betrag einer Sinuskurve * 45 Grad hergeleitet
+            "schritt": 0, # Pacman macht einen Schritt. Wird u.A für Mund Bewegung benutzt
+            "direction": None, # Richtungswechsel
+            "next_direction": None, # Richtungswechsel Zwischenspeicher
+            "zaehler": 0, # Punkte zählen / aus feld auslesen
+            "power_up": False # Power-Up Zustand: True oder False
         }
-    # Geister Werte
+    # Geister Werte: Position, Farbe, Geschwindigkeit, Bewegung
     def ghosts(farben):
         return [
             {"x": 9.0, "y": 7.0, "color": farben["ROT"], "speed": 2, "move": [0, 0]},
@@ -159,100 +147,38 @@ if __name__ == "__main__":
     # PACMAN SPIEL !!!
     def pacman_spiel(PIXEL, pacman_field, farben, s_w, ghosts, ghost_images):
 
+        pygame.mixer.init()
+        pacman = pygame.mixer.Sound("./assets/pacman_beginning.wav")
+        pygame.mixer.Sound.play(pacman) # Pacman Musik spielen
+        # Screen Grösse
         SCREEN_WIDTH = len(pacman_field[0]) * PIXEL
         SCREEN_HEIGHT = len(pacman_field) * PIXEL
-
         # Pygame initialisieren
         pygame.init()
         screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
         pygame.display.set_caption("Pac-Man")
         clock = pygame.time.Clock()
 
-        # Zeichne Spielfeld
-        def draw_field():
-            for row in range(len(pacman_field)):
-                for col in range(len(pacman_field[row])):
-                    x = col * PIXEL
-                    y = row * PIXEL
-                    if pacman_field[row][col] == 1:  # Wand
-                        pygame.draw.rect(screen, farben["BLAU"], (x, y, PIXEL, PIXEL))
-                    elif pacman_field[row][col] == 2:  # Punkt
-                        pygame.draw.circle(screen, farben["WEISS"], (x + PIXEL / 2, y + PIXEL / 2), PIXEL / 8)
-                    elif pacman_field[row][col] == 3:  # Power-Up
-                        pygame.draw.circle(screen, farben["WEISS"], (x + PIXEL / 2, y + PIXEL / 2), PIXEL / 4)
-        # Zeichne Pacman
-        def draw_pacman(x, y, ang, mouth):
-
-            # Pacmans Mund bewegt sich
-            if s_w["move"] != [0, 0]:
-                s_w["schritt"] += 1
-                s_w["mund"] = abs(math.sin(math.pi / PIXEL * s_w["schritt"] * 2)) * 45
-
-            # Pacman zeichnen
-            surface_1 = pygame.Surface((PIXEL, PIXEL), pygame.SRCALPHA)
-            surface_2 = pygame.Surface((PIXEL, PIXEL), pygame.SRCALPHA)
-            pygame.draw.circle(
-                surface_1,
-                farben["GELB"],
-                (PIXEL / 2, PIXEL / 2),
-                PIXEL / 3,
-                draw_top_right=True, draw_top_left=True
-            )
-            pygame.draw.circle(
-                surface_2,
-                farben["GELB"],
-                (PIXEL / 2, PIXEL / 2),
-                PIXEL / 3,
-                draw_bottom_right=True, draw_bottom_left=True
-            )
-            rotated_surface_1 = pygame.transform.rotate(surface_1, ang + mouth)
-            rotated_surface_2 = pygame.transform.rotate(surface_2, ang - mouth)
-
-            rotated_rect_1 = rotated_surface_1.get_rect(
-                center=(int(x * PIXEL + PIXEL / 2), int(y * PIXEL + PIXEL / 2))
-            )
-            rotated_rect_2 = rotated_surface_2.get_rect(
-                center=(int(x * PIXEL + PIXEL / 2), int(y * PIXEL + PIXEL / 2))
-            )
-
-            screen.blit(rotated_surface_1, rotated_rect_1.topleft)
-            screen.blit(rotated_surface_2, rotated_rect_2.topleft)
-        # Geister Zeichnen
-        def draw_ghosts(ghosts, power_up_active, ghost_images):
-            for ghost in ghosts:
-                if power_up_active:
-                    # Power-Up-Bild verwenden
-                    ghost_image = ghost_images["POWER_UP"]
-                else:
-                    # Normales Bild basierend auf der Farbe des Geists
-                    ghost_image = ghost_images[ghost["color"]]
-
-                # Geisterposition berechnen
-                ghost_x = ghost["x"] * PIXEL + PIXEL / 4
-                ghost_y = ghost["y"] * PIXEL + PIXEL / 4
-
-                # Geist zeichnen
-                screen.blit(ghost_image, (ghost_x, ghost_y))
         # Pacman schaut, ob er einen Richtungswechsel machen kann
         def pacman_bewegung():
-            if abs(s_w["player_pos"][0] - round(s_w["player_pos"][0])) < 0.01 and abs(
+            if abs(s_w["player_pos"][0] - round(s_w["player_pos"][0])) < 0.01 and abs(  # Zentrierung's Check
                     s_w["player_pos"][1] - round(s_w["player_pos"][1])) < 0.01:
                 grid_x, grid_y = int(round(s_w["player_pos"][0])), int(round(s_w["player_pos"][1]))
 
-                if s_w["next_direction"]:
-                    if s_w["next_direction"] == "Up" and pacman_field[grid_y - 1][grid_x] != 1:
+                if s_w["next_direction"]:  # Wenn next_direction nicht leer ist
+                    if s_w["next_direction"] == "Up" and pacman_field[grid_y - 1][grid_x] != 1:  # Ist oben Wand?
                         s_w["direction"] = s_w["next_direction"]
                         s_w["angle"] = 90
-                    elif s_w["next_direction"] == "Down" and pacman_field[grid_y + 1][grid_x] != 1:
+                    elif s_w["next_direction"] == "Down" and pacman_field[grid_y + 1][grid_x] != 1:  # Ist unten Wand?
                         s_w["direction"] = s_w["next_direction"]
                         s_w["angle"] = -90
-                    elif s_w["next_direction"] == "Right" and pacman_field[grid_y][grid_x + 1] != 1:
+                    elif s_w["next_direction"] == "Right" and pacman_field[grid_y][grid_x + 1] != 1:  # Ist rechts Wand?
                         s_w["direction"] = s_w["next_direction"]
                         s_w["angle"] = 0
-                    elif s_w["next_direction"] == "Left" and pacman_field[grid_y][grid_x - 1] != 1:
+                    elif s_w["next_direction"] == "Left" and pacman_field[grid_y][grid_x - 1] != 1:  # Ist links Wand?
                         s_w["direction"] = s_w["next_direction"]
                         s_w["angle"] = 180
-
+                # Pacman bewegt sich
                 if s_w["direction"] == "Up" and pacman_field[grid_y - 1][grid_x] != 1:
                     s_w["move"][:] = [0, -s_w["speed"] / PIXEL]
                 elif s_w["direction"] == "Down" and pacman_field[grid_y + 1][grid_x] != 1:
@@ -263,10 +189,31 @@ if __name__ == "__main__":
                     s_w["move"][:] = [-s_w["speed"] / PIXEL, 0]
                 else:
                     s_w["move"][:] = [0, 0]
-
+            # Pacman Position wird ge-updatet
             s_w["player_pos"][0] += s_w["move"][0]
             s_w["player_pos"][1] += s_w["move"][1]
-        # Power-Up: Ja oder Nein?
+        # Pacman sammelt Punkte oder Power-Ups
+        def punkte_sammeln(s_w, field):
+            grid_x, grid_y = int(round(s_w["player_pos"][0])), int(round(s_w["player_pos"][1]))
+            if field[grid_y][grid_x] == 2: # Punkte
+                iss = pygame.mixer.Sound("./assets/pacman_chomp.wav")
+                pygame.mixer.Sound.play(iss)  # Pacman isst Punkte
+                s_w["zaehler"] += 10
+                field[grid_y][grid_x] = 0
+
+            if field[grid_y][grid_x] == 3: # Power Up
+                s_w["power_up"] = True
+                s_w["zaehler"] += 10
+                field[grid_y][grid_x] = 0
+                iss = pygame.mixer.Sound("./assets/pacman_eatfruit.wav")
+                pygame.mixer.Sound.play(iss)  # Pacman isst Power Up
+        # Pacman geht durch Tunnel
+        def tunnel_logik(player_pos, direction, pacman_field):
+            if player_pos[0] >= len(pacman_field[0]) - 1 and direction == "Right": # Pacman gegen den linken oder rechten Rand verschieben
+                player_pos[0] = 0
+            elif player_pos[0] < 0 and direction == "Left":
+                player_pos[0] = len(pacman_field[0]) - 1
+        # Power Up Check: True oder False
         def power_up_check(s_w, power_up_timer, run_away, ghosts, geister_bewegung_1, geister_bewegung_2):
             if s_w["power_up"]:
                 power_up_timer += 1
@@ -276,7 +223,7 @@ if __name__ == "__main__":
                     s_w["power_up"] = False
                     power_up_timer = 0
             else:
-                wahl = random.choice([1, 2, 3])
+                wahl = random.choice([1, 2, 3]) # Wahl zwischen 2 Bewegung's Algorithmen
                 if wahl == 1:
                     geister_bewegung_1(ghosts, pacman_field, PIXEL)
                 else:
@@ -288,7 +235,7 @@ if __name__ == "__main__":
                 x = round(ghost["x"])
                 y = round(ghost["y"])
 
-                if abs(ghost["x"] - x) < 0.01 and abs(ghost["y"] - y) < 0.01:
+                if abs(ghost["x"] - x) < 0.01 and abs(ghost["y"] - y) < 0.01: # Zentrierung
                     ghost["x"], ghost["y"] = x, y
 
                     valid_moves = []
@@ -354,18 +301,14 @@ if __name__ == "__main__":
             for ghost in ghosts:
                 ghost_x, ghost_y = ghost["x"], ghost["y"]
                 pacman_x, pacman_y = pacman_pos[0], pacman_pos[1]
-
                 # Prüfen, ob der Geist genau im Zentrum einer Zelle ist
                 if abs(ghost_x - round(ghost_x)) < 0.01 and abs(ghost_y - round(ghost_y)) < 0.01:
                     ghost_x, ghost_y = round(ghost_x), round(ghost_y)
-
                     # Liste für gültige Bewegungen, die vom Pac-Man wegführen
                     best_moves = []
                     max_distance = -1
-
                     for dx, dy in directions:
                         next_x, next_y = ghost_x + dx, ghost_y + dy
-
                         # Prüfen, ob das Ziel gültig ist (keine Wand)
                         if (0 <= next_x < len(pacman_field[0]) and 0 <= next_y < len(pacman_field) and pacman_field[next_y][next_x] != 1):
                             # Abstand zum Pac-Man berechnen
@@ -375,64 +318,20 @@ if __name__ == "__main__":
                                 max_distance = distance
                             elif distance == max_distance:
                                 best_moves.append((dx, dy))
-
                     # Zufällige Bewegung aus den besten Optionen wählen
                     if best_moves:
                         move = random.choice(best_moves)
                         ghost["move"] = [move[0], move[1]]
-
                 # Bewegung ausführen und prüfen, ob die neue Position gültig bleibt
                 new_x = ghost["x"] + ghost["speed"] / 2 / PIXEL * ghost["move"][0]
                 new_y = ghost["y"] + ghost["speed"] / 2 / PIXEL * ghost["move"][1]
-
-                if (
-                        0 <= round(new_x) < len(pacman_field[0]) and
-                        0 <= round(new_y) < len(pacman_field) and
-                        pacman_field[round(new_y)][round(new_x)] != 1  # Ziel ist keine Wand
-                ):
+                # Ziel ist keine Wand
+                if (0 <= round(new_x) < len(pacman_field[0]) and 0 <= round(new_y) < len(pacman_field) and pacman_field[round(new_y)][round(new_x)] != 1):
                     ghost["x"] = new_x
                     ghost["y"] = new_y
                 else:
                     # Wenn Bewegung ungültig ist, stoppe den Geist
                     ghost["move"] = [0, 0]
-        # Pacman geht durch Tunnel
-        def tunnel_logik(player_pos, direction, pacman_field):
-            if player_pos[0] >= len(pacman_field[0]) - 1 and direction == "Right":
-                player_pos[0] = 0
-            elif player_pos[0] < 0 and direction == "Left":
-                player_pos[0] = len(pacman_field[0]) - 1
-        # Pacman sammelt Punkte oder Power-Ups
-        def punkte_sammeln(s_w, field):
-            grid_x, grid_y = int(round(s_w["player_pos"][0])), int(round(s_w["player_pos"][1]))
-            if field[grid_y][grid_x] == 2:
-                s_w["zaehler"] += 10
-                field[grid_y][grid_x] = 0
-
-            if field[grid_y][grid_x] == 3:
-                s_w["power_up"] = True
-                s_w["zaehler"] += 10
-                field[grid_y][grid_x] = 0
-        # Kollision Check
-        def check_collision(s_w, ghosts, PIXEL):
-            for ghost in ghosts:
-                if int(round(s_w["player_pos"][0])) == round(ghost["x"]) and int(round(s_w["player_pos"][1])) == round(
-                        ghost["y"]):
-                    if s_w["power_up"] == False:
-                        ausgabetext = "Game Over!"
-                        font = pygame.font.SysFont(None, PIXEL)
-                        text = font.render(ausgabetext, True, farben["ROT"])
-                        text_breite = text.get_width()
-                        screen.blit(text, [(SCREEN_WIDTH / 2) - text_breite / 2, PIXEL / 4])
-                        save_highscore(s_w, ghosts)
-                        pygame.display.flip()
-                        pygame.time.delay(2500)
-                        return True
-                    elif s_w["power_up"] == True:
-                        ghost["x"] = 9.0
-                        ghost["y"] = 7.0
-                        s_w["zaehler"] += 100
-
-            return False
         # Highscore Auslesen
         def read_highscore():
             try:
@@ -443,56 +342,149 @@ if __name__ == "__main__":
                     current_highscore = int(line)
                     return current_highscore
             except FileNotFoundError:
-                return 0  # Default highscore if file doesn't exist
+                return 0
+        # Highscore speichern
+        def save_highscore(s_w, ghosts):
+            s_w["move"] = [0, 0] # Keine Bewegung
+            for ghost in ghosts:
+                ghost["move"] = [0, 0] # Keine Bewegung
+
+            current_highscore = read_highscore()
+
+            if s_w["zaehler"] > current_highscore: # Es wird neuer Highscore geschrieben
+                with open("highscore.csv", "w") as datei:
+                    datei.write(f"{s_w['zaehler']},")
+                print("New Highscore!")
+        # Zeichne Spielfeld
+        def draw_field():
+            for row in range(len(pacman_field)):
+                for col in range(len(pacman_field[row])):
+                    x = col * PIXEL
+                    y = row * PIXEL
+                    if pacman_field[row][col] == 1:  # Wand
+                        pygame.draw.rect(screen, farben["BLAU"], (x, y, PIXEL, PIXEL))
+                    elif pacman_field[row][col] == 2:  # Punkt
+                        pygame.draw.circle(screen, farben["WEISS"], (x + PIXEL / 2, y + PIXEL / 2), PIXEL / 8)
+                    elif pacman_field[row][col] == 3:  # Power-Up
+                        pygame.draw.circle(screen, farben["WEISS"], (x + PIXEL / 2, y + PIXEL / 2), PIXEL / 4)
+        # Zeichne Pacman
+        def draw_pacman(x, y, ang, mouth):
+
+            # Pacmans Mund bewegt sich
+            if s_w["move"] != [0, 0]:
+                s_w["schritt"] += 1
+                s_w["mund"] = abs(math.sin(math.pi / PIXEL * s_w["schritt"] * 2)) * 45
+
+            # Pacman zeichnen
+            surface_1 = pygame.Surface((PIXEL, PIXEL), pygame.SRCALPHA)
+            surface_2 = pygame.Surface((PIXEL, PIXEL), pygame.SRCALPHA)
+            pygame.draw.circle(
+                surface_1,
+                farben["GELB"],
+                (PIXEL / 2, PIXEL / 2),
+                PIXEL / 3,
+                draw_top_right=True, draw_top_left=True
+            )
+            pygame.draw.circle(
+                surface_2,
+                farben["GELB"],
+                (PIXEL / 2, PIXEL / 2),
+                PIXEL / 3,
+                draw_bottom_right=True, draw_bottom_left=True
+            )
+            rotated_surface_1 = pygame.transform.rotate(surface_1, ang + mouth)
+            rotated_surface_2 = pygame.transform.rotate(surface_2, ang - mouth)
+
+            rotated_rect_1 = rotated_surface_1.get_rect(
+                center=(int(x * PIXEL + PIXEL / 2), int(y * PIXEL + PIXEL / 2))
+            )
+            rotated_rect_2 = rotated_surface_2.get_rect(
+                center=(int(x * PIXEL + PIXEL / 2), int(y * PIXEL + PIXEL / 2))
+            )
+
+            screen.blit(rotated_surface_1, rotated_rect_1.topleft)
+            screen.blit(rotated_surface_2, rotated_rect_2.topleft)
+        # Geister Zeichnen
+        def draw_ghosts(ghosts, power_up_active, ghost_images):
+            for ghost in ghosts:
+                if power_up_active:
+                    # Power-Up-Bild verwenden
+                    ghost_image = ghost_images["POWER_UP"]
+                else:
+                    # Normales Bild basierend auf der Farbe des Geists
+                    ghost_image = ghost_images[ghost["color"]]
+
+                # Geisterposition berechnen
+                ghost_x = ghost["x"] * PIXEL + PIXEL / 4
+                ghost_y = ghost["y"] * PIXEL + PIXEL / 4
+
+                # Geist zeichnen
+                screen.blit(ghost_image, (ghost_x, ghost_y))
+        # Highscore anzeigen im Spiel
+        def display_highscore(farben):
+            current_highscore = str(read_highscore())
+            font = pygame.font.SysFont(None, PIXEL)
+            text = font.render(f"Highscore: {current_highscore}", True, farben["WEISS"])
+            screen.blit(text, [PIXEL, PIXEL / 4])
+        # Score anzeigen im Spiel
+        def display_score():
+            font = pygame.font.SysFont(None, PIXEL)
+            text = font.render(f"Score: {s_w['zaehler']}", True, farben["WEISS"])
+            text_breite = text.get_width()
+            screen.blit(text, [SCREEN_WIDTH - text_breite - PIXEL, PIXEL / 4])
+        # Kollision Check
+        def check_collision(s_w, ghosts, PIXEL):
+            for ghost in ghosts:
+                if int(round(s_w["player_pos"][0])) == round(ghost["x"]) and int(round(s_w["player_pos"][1])) == round(
+                        ghost["y"]):
+                    if s_w["power_up"] == False: # Spiel vorbei. Pacman wurde erwischt.
+                        ausgabetext = "Game Over!"
+                        tot = pygame.mixer.Sound("./assets/pacman_death.wav")
+                        pygame.mixer.Sound.play(tot)  # Pacman isst Geist
+                        font = pygame.font.SysFont(None, PIXEL)
+                        text = font.render(ausgabetext, True, farben["ROT"])
+                        text_breite = text.get_width()
+                        screen.blit(text, [(SCREEN_WIDTH / 2) - text_breite / 2, PIXEL / 4])
+                        save_highscore(s_w, ghosts)
+                        pygame.display.flip()
+                        pygame.time.delay(2500)
+                        return True
+                    elif s_w["power_up"] == True: # Pacman erwischt Geist. Geist wird an Ursprungsort versetzt.
+                        ghost["x"] = 9.0
+                        ghost["y"] = 7.0
+                        s_w["zaehler"] += 100
+                        iss = pygame.mixer.Sound("./assets/pacman_eatghost.wav")
+                        pygame.mixer.Sound.play(iss)  # Pacman isst Geist
+
+            return False
         # Schauen, ob alle Punkte eingesammelt sind
         def check_finish(s_w, ghosts):
-            Init = 0
+            Init = 0 # Hier wird gezählt, wie viele Punkte noch im Spielfeld übrig sind.
             for row in range(len(pacman_field)):
                 for col in range(len(pacman_field[row])):
                     if pacman_field[row][col] == 2:
                         Init += 1
 
-            if Init == 0:
-                s_w["zaehler"] += 200
+            if Init == 0: # Wenn keine Punkte mehr übrig sind, hat Pacman gewonnen.
+                s_w["zaehler"] += 200 # Zusätzliche Punkte
                 save_highscore(s_w, ghosts)
                 ausgabetext = "Gewonnen!"
                 font = pygame.font.SysFont(None, PIXEL)
                 text = font.render(ausgabetext, True, farben["ROT"])
                 text_breite = text.get_width()
                 screen.blit(text, [(SCREEN_WIDTH / 2) - text_breite / 2, PIXEL / 4])
+                win = pygame.mixer.Sound("./assets/pacman_intermission.wav")
+                pygame.mixer.Sound.play(win)  # Pacman isst Geist
                 save_highscore(s_w, ghosts)
                 pygame.display.flip()
                 pygame.time.delay(2500)
                 return True
             return False
-        # Highscore speichern
-        def save_highscore(s_w, ghosts):
-            s_w["move"] = [0, 0]
-            for ghost in ghosts:
-                ghost["move"] = [0, 0]
-
-            current_highscore = read_highscore()
-
-            if s_w["zaehler"] > current_highscore:
-                with open("highscore.csv", "w") as datei:
-                    datei.write(f"{s_w['zaehler']},")
-                print("New Highscore!")
-        # Highscore anzeigen
-        def display_highscore(farben):
-            current_highscore = str(read_highscore())
-            font = pygame.font.SysFont(None, PIXEL)
-            text = font.render(f"Highscore: {current_highscore}", True, farben["WEISS"])
-            screen.blit(text, [PIXEL, PIXEL / 4])
-        # Score anzeigen
-        def display_score():
-            font = pygame.font.SysFont(None, PIXEL)
-            text = font.render(f"Score: {s_w['zaehler']}", True, farben["WEISS"])
-            text_breite = text.get_width()
-            screen.blit(text, [SCREEN_WIDTH - text_breite - PIXEL, PIXEL / 4])
 
         # Spieldurchlauf
+        pacman_field[int(s_w["player_pos"][0])][int(s_w["player_pos"][1])] = 0 # Soll kein Punkt da sein, wo Pacman anfängt
         power_up_timer = 0  # Timer für den Power-Up Zustand
-        frame_count = 0  # Counter für
+        frame_count = 0  # Counter für Power Up
         running = True
         while running:
             for event in pygame.event.get():
@@ -512,10 +504,10 @@ if __name__ == "__main__":
             pacman_bewegung()
             # Pacman sammelt Punkte und Power-Up
             punkte_sammeln(s_w, pacman_field)
-            # Power Up falls Pacman Power Up isst
-            power_up_timer = power_up_check(s_w, power_up_timer, run_away, ghosts, geister_bewegung_1, geister_bewegung_2)
             # Pacman geht durch Tunnel
             tunnel_logik(s_w["player_pos"], s_w["direction"], pacman_field)
+            # Power Up falls Pacman Power Up isst
+            power_up_timer = power_up_check(s_w, power_up_timer, run_away, ghosts, geister_bewegung_1, geister_bewegung_2)
             # Schwarzer Hintergrund
             screen.fill(farben["SCHWARZ"])
             # Zeichne Spielfeld
@@ -528,7 +520,7 @@ if __name__ == "__main__":
             display_highscore(farben)
             # Score anzeigen
             display_score()
-            # Kollisions Logik zwischen Pacman und Geister
+            # Kollision Logik zwischen Pacman und Geister
             if check_collision(s_w, ghosts, PIXEL):  # Kollision Check
                 return  # Return to main menu
             # Ist das Spiel fertig?
@@ -543,12 +535,12 @@ if __name__ == "__main__":
 
         pygame.quit()
         sys.exit()
-    # Raster Grösse
+    # Raster / Block / Screen und Charakter Grösse
     PIXEL = 40
     # Pacman Spiel starten
     while True:
-        hauptmenu(PIXEL)
-        pacman_spiel(
+        hauptmenue(PIXEL) # Hauptmenü Funktion
+        pacman_spiel( # Pacman Spiel Funktion
             PIXEL,
             read_field(),
             farben(),

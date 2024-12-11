@@ -9,6 +9,9 @@ Funktion Pacman Spiel
     - ⤷ Ausführung der Spiellogik Funktionen  
 
 Ausführung Pacman Spiel
+  - ⤷ While Loop
+  - ⤷ Hauptmenü
+    - ⤷ Pacman_Spiel
 
 ## 2. SPIEL AUSFÜHRUNG:
 Das Spiel ist in Python geschrieben und kann durch "Run Main" (Zeile 7) ausgeführt werden.
@@ -25,3 +28,11 @@ Das Spiel ist in Python geschrieben und kann durch "Run Main" (Zeile 7) ausgefü
 - Highscore wird angezeigt und neuer Highscore wird gespeichert
 - Pacman gewinnt, wenn er alle Punkte einsammelt
 - Pacman verliert, wenn er von einem Geist gefangen wird
+
+## 5. Punkte System:
+Punkte werden wie folgt vergeben:
+
+- Weisse Punkte: 10
+- Power Ups: 10
+- Geister essen: 100
+- Level fertig spielen: 200
