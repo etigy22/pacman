@@ -10,7 +10,7 @@ Funktion Pacman Spiel
 
 Ausführung Pacman Spiel
   - ⤷ While Loop
-  - ⤷ Hauptmenü
+    - ⤷ Hauptmenü
     - ⤷ Pacman_Spiel
 
 ## 2. SPIEL AUSFÜHRUNG:
